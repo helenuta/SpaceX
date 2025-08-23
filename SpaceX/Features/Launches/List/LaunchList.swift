@@ -22,6 +22,13 @@ struct LaunchList: View {
     var body: some View {
         content
             .navigationTitle("Launches")
+            .toolbar {
+                Button {
+                    coordinator.openFavorites()
+                } label: {
+                    Image(systemName: "heart")
+                }
+            }
             .onAppear {
                 // Rebind to the actual DI singletons
                 // (workaround to pass env objects into @StateObject)
@@ -45,11 +52,22 @@ struct LaunchList: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List(vm.rows) { row in
-                    Button {
-                        coordinator.openDetails(for: row.id)
-                    } label: {
-                        LaunchRowView(row: row) { vm.toggleFavorite(id: row.id) }
-                    }
+                    LaunchRowView(row: row) {
+                           vm.toggleFavorite(id: row.id)
+                       }
+                       .contentShape(Rectangle())
+                       .onTapGesture {                            
+                           coordinator.openDetails(for: row.id)
+                       }
+                       .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                           Button {
+                               vm.toggleFavorite(id: row.id)
+                           } label: {
+                               Label(row.isFavorite ? "Unfavorite" : "Favorite",
+                                     systemImage: row.isFavorite ? "heart.slash" : "heart")
+                           }
+                           .tint(row.isFavorite ? .gray : .pink)
+                       }
                 }
                 .listStyle(.plain)
             }

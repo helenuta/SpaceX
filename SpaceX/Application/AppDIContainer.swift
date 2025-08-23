@@ -28,7 +28,8 @@ final class AppDIContainer: ObservableObject {
                                     defaultHeaders: ["Accept": "application/json"])
         let http = HTTPClient(configuration: config)
         let img = ImageLoader()
-        let fav = FavoritesStore()               // in-memory for now; Core Data later
+        let context = PersistenceController.shared.container.viewContext
+        let fav = FavoritesStore(context: context)
         let repo = LaunchesRepository(network: http)
         return AppDIContainer(network: http,
                               imageLoader: img,
