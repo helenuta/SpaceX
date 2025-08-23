@@ -25,7 +25,7 @@ final class AppDIContainer: ObservableObject {
 
     static func make() -> AppDIContainer {
         let config = NetworkConfig(baseURL: URL(string: "https://api.spacexdata.com")!,
-                                   headers: ["Accept": "application/json"])
+                                    defaultHeaders: ["Accept": "application/json"])
         let http = HTTPClient(configuration: config)
         let img = ImageLoader()
         let fav = FavoritesStore()               // in-memory for now; Core Data later
