@@ -19,4 +19,8 @@ enum LaunchesAPI {
     static func payload(id: String) -> Endpoint {
         Endpoint(path: "/v4/payloads/\(id)")
     }
+    
+    static func launch(id: String) -> Endpoint {
+        Endpoint(path: "v4/launches/\(id)")
+    }
 }

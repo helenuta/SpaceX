@@ -29,13 +29,12 @@ struct RootView: View {
         }
         .onAppear {
             coordinator.start()
-            di.launchesRepository.debugFetchPastRaw()
-                           .sink(receiveCompletion: { completion in
-                               print("completion:", completion)
-                           }, receiveValue: { data in
-                               print("OK bytes:", data.count)
-                               if let snippet = String(data: data.prefix(300), encoding: .utf8) {
-                                   print("snippet:", snippet)
+            di.launchesRepository.fetchPastLaunches()
+                           .sink(receiveCompletion: { print("completion:", $0)},
+                                 receiveValue: { launches in
+                               print("launches count:", launches.count)
+                               launches.prefix(3).forEach {
+                                   print("*", $0.name, "—", AppDateFormatter.launchShort.string(from: $0.date))
                                }
                            })
                            .store(in: &cancellables)
