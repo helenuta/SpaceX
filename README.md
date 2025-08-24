@@ -48,7 +48,7 @@ The app lists SpaceX launches, shows a details screen with an embedded YouTube p
 
 | Action                    | Dark                                                                 | Light                                                                 |
 |---------------------------|----------------------------------------------------------------------|-----------------------------------------------------------------------|
-| **Add to Favorites**      | <img src="SpaceX/Docs/Add_to_favorites_dark.png" width="280" alt="Add Favorite Dark"> | — |
+| **Add to Favorites**      | <img src="SpaceX/Docs/Add_to_favorites_dark.png" width="280" alt="Add Favorite Dark"> | <img src="SpaceX/Docs/Add_to_favorites_light.png" width="280" alt="Add Favorite Dark"> |
 | **Remove from Favorites** | <img src="SpaceX/Docs/Remove_from_favorites_dark.png" width="280" alt="Remove Favorite Dark"> | <img src="SpaceX/Docs/Remove_from_favorites_light.png" width="280" alt="Remove Favorite Light"> |
 
 ---
