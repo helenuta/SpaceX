@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct FavoritesView: View {
-    @ObservedObject var vm: FavoritesViewModel
+struct FavoritesView<VM: FavoritesViewModeling>: View {
+    @ObservedObject var vm: VM
     let onOpenDetails: (String) -> Void
     let onClearAll: () -> Void
 

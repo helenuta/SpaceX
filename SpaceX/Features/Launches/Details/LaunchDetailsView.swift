@@ -8,14 +8,17 @@
 import SwiftUI
 import YouTubePlayerKit
 
-struct LaunchDetailsView: View {
-    @StateObject private var vm: LaunchDetailsViewModel
+struct LaunchDetailsView<VM: LaunchDetailsViewModeling>: View {
+    @StateObject private var vm: VM
     @State private var safariURL: URL?
     
-    init(launchID: String, factory: ViewModelFactory) {
+    init(launchID: String, factory: ViewModelFactory) where VM == LaunchDetailsViewModel {
         _vm = StateObject(wrappedValue: factory.makeLaunchDetailsViewModel(launchID: launchID))
     }
-    
+    /// TESTS/PREVIEWS: inject any mock VM that conforms to the protocol
+    init(vm: VM) {
+        _vm = StateObject(wrappedValue: vm)
+    }
     var body: some View {
         Group {
             if vm.isLoading {

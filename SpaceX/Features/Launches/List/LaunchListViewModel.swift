@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 @MainActor
-final class LaunchListViewModel: ObservableObject {
+final class LaunchListViewModel: ObservableObject, LaunchListViewModeling {
     struct Row: Identifiable, Hashable {
         let id: String
         let title: String
@@ -18,7 +18,7 @@ final class LaunchListViewModel: ObservableObject {
         var isFavorite: Bool
     }
 
-    @Published private(set) var rows: [Row] = []
+    @Published private(set) var rows: [LaunchListRow] = []
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
 

@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct LaunchListView: View {
+struct LaunchListView<VM: LaunchListViewModeling>: View {
     @EnvironmentObject private var coordinator: AppCoordinator
-    @ObservedObject var vm: LaunchListViewModel
+    @ObservedObject var vm: VM
     
     var body: some View {
         content

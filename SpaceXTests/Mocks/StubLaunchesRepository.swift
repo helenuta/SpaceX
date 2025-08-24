@@ -14,7 +14,7 @@ final class StubLaunchesRepository: LaunchesRepositoryType {
     var rockets: [String: Rocket]
     var payloads: [String: Payload]
     var launchByID: [String: Launch]
-    /// Tto make every call fail for error paths
+    /// To make every call fail for error paths
     var forcedError: NetworkError?
 
     init(

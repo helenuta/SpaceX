@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LaunchRowView: View {
-    let row: LaunchListViewModel.Row
+    let row: LaunchListRow
     let onToggleFavorite: () -> Void
     
     var body: some View {

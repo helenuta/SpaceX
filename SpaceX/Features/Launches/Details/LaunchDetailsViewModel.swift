@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 @MainActor
-final class LaunchDetailsViewModel: ObservableObject {
+final class LaunchDetailsViewModel: ObservableObject, LaunchDetailsViewModeling {
     let launchID: String
     
     @Published private(set) var title: String = ""

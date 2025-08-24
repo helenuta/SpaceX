@@ -10,39 +10,32 @@ import Combine
 import SwiftUI
 
 @MainActor
-final class FavoritesViewModel: ObservableObject {
-    struct Row: Identifiable, Hashable {
-        let id: String
-        let title: String
-        let subtitle: String
-        let imageURL: URL?
-        var isFavorite: Bool
-    }
-
-    @Published private(set) var rows: [Row] = []
+final class FavoritesViewModel: ObservableObject, FavoritesViewModeling {
+    
+    @Published private(set) var rows: [FavoriteRow] = []
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
-
+    
     private let repo: LaunchesRepositoryType
     private let favorites: FavoritesStoring
     private var allLaunches: [Launch] = []
     private var cancellables = Set<AnyCancellable>()
-
+    
     init(repo: LaunchesRepositoryType, favorites: FavoritesStoring) {
         self.repo = repo
         self.favorites = favorites
         bindFavorites()
     }
-
+    
     func onAppear() {
         if allLaunches.isEmpty { load() }
         else { rebuildRows() }
     }
-
+    
     func reload() { load() }
-
+    
     func removeFavorite(id: String) { favorites.remove(id) }
-
+    
     private func load() {
         isLoading = true; errorMessage = nil
         repo.fetchPastLaunches()
@@ -56,20 +49,25 @@ final class FavoritesViewModel: ObservableObject {
             })
             .store(in: &cancellables)
     }
+}
 
-    private func rebuildRows() {
+private extension FavoritesViewModel {
+    func rebuildRows() {
         let favs = favorites.ids
-        let filtered = allLaunches.filter { favs.contains($0.id) }
-        self.rows = filtered.map {
-            Row(id: $0.id,
-                title: $0.name,
-                subtitle: AppDateFormatter.launchShort.string(from: $0.date),
-                imageURL: $0.imageURL,
-                isFavorite: true)
-        }
+        rows = allLaunches
+            .filter { favs.contains($0.id) }
+            .map {
+                FavoriteRow(
+                    id: $0.id,
+                    title: $0.name,
+                    subtitle: AppDateFormatter.launchShort.string(from: $0.date),
+                    imageURL: $0.imageURL,
+                    isFavorite: true
+                )
+            }
     }
-
-    private func bindFavorites() {
+    
+    func bindFavorites() {
         favorites.publisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] favs in
