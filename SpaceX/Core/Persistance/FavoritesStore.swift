@@ -9,7 +9,19 @@ import Foundation
 import Combine
 import CoreData
 
-final class FavoritesStore: NSObject, ObservableObject {
+@MainActor
+public protocol FavoritesStoring: AnyObject {
+    var ids: Set<String> { get }
+    var publisher: AnyPublisher<Set<String>, Never> { get }
+
+    func isFavorite(_ id: String) -> Bool
+    func toggle(_ id: String)
+    func add(_ id: String)
+    func remove(_ id: String)
+    func removeAll()
+}
+
+final class FavoritesStore: NSObject, ObservableObject, FavoritesStoring {
     @Published private(set) var ids: Set<String> = []
 
     private let context: NSManagedObjectContext
@@ -38,7 +50,9 @@ final class FavoritesStore: NSObject, ObservableObject {
 
     func isFavorite(_ id: String) -> Bool { ids.contains(id) }
 
-    func toggle(_ id: String) { isFavorite(id) ? remove(id) : add(id) }
+    func toggle(_ id: String) {
+        isFavorite(id) ? remove(id) : add(id)
+    }
 
     func add(_ id: String) {
         context.perform {

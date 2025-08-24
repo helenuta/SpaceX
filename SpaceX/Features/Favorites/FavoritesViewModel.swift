@@ -7,7 +7,9 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
+@MainActor
 final class FavoritesViewModel: ObservableObject {
     struct Row: Identifiable, Hashable {
         let id: String
@@ -21,12 +23,12 @@ final class FavoritesViewModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
 
-    private let repo: LaunchesRepository
-    private let favorites: FavoritesStore
+    private let repo: LaunchesRepositoryType
+    private let favorites: FavoritesStoring
     private var allLaunches: [Launch] = []
     private var cancellables = Set<AnyCancellable>()
 
-    init(repo: LaunchesRepository, favorites: FavoritesStore) {
+    init(repo: LaunchesRepositoryType, favorites: FavoritesStoring) {
         self.repo = repo
         self.favorites = favorites
         bindFavorites()
@@ -41,7 +43,6 @@ final class FavoritesViewModel: ObservableObject {
 
     func removeFavorite(id: String) { favorites.remove(id) }
 
-    // MARK: - Private
     private func load() {
         isLoading = true; errorMessage = nil
         repo.fetchPastLaunches()
@@ -71,7 +72,16 @@ final class FavoritesViewModel: ObservableObject {
     private func bindFavorites() {
         favorites.publisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.rebuildRows() }
+            .sink { [weak self] favs in
+                
+                guard let self else { return }
+                if self.allLaunches.isEmpty, !favs.isEmpty {
+                    // If we have favorites but no launches cached yet, fetch them.
+                    self.load()
+                } else {
+                    self.rebuildRows()
+                }
+            }
             .store(in: &cancellables)
     }
 }

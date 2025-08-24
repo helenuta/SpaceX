@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 
+@MainActor
 final class LaunchListViewModel: ObservableObject {
     struct Row: Identifiable, Hashable {
         let id: String
@@ -21,11 +22,11 @@ final class LaunchListViewModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
 
-    private let repo: LaunchesRepository
-    private let favorites: FavoritesStore
+    private let repo: LaunchesRepositoryType
+    private let favorites: FavoritesStoring
     private var cancellables = Set<AnyCancellable>()
 
-    init(repo: LaunchesRepository, favorites: FavoritesStore) {
+    init(repo: LaunchesRepositoryType, favorites: FavoritesStoring) {
         self.repo = repo
         self.favorites = favorites
         bindFavorites()

@@ -9,52 +9,76 @@ import SwiftUI
 import YouTubePlayerKit
 
 struct LaunchDetailsView: View {
-    @ObservedObject var vm: LaunchDetailsViewModel
+    @StateObject private var vm: LaunchDetailsViewModel
     @State private var safariURL: URL?
     
+    init(launchID: String, factory: ViewModelFactory) {
+        _vm = StateObject(wrappedValue: factory.makeLaunchDetailsViewModel(launchID: launchID))
+    }
+    
     var body: some View {
+        Group {
+            if vm.isLoading {
+                StateView(kind: .loading(title: "Loading details…"))
+            } else if let err = vm.errorMessage {
+                StateView(kind: .error(message: err) {
+                    vm.onAppear()
+                })
+            } else {
+                content
+            }
+        }
+        .navigationTitle(vm.title.isEmpty ? "Details" : vm.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $safariURL) { url in
+            SafariView(url: url)
+        }
+        .onAppear { vm.onAppear() }
+    }
+    
+    @ViewBuilder
+    private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                
+                // Video or image
                 if let videoURL = vm.youtubeURL {
                     YouTubeKitPlayerView(url: videoURL)
                         .padding(.bottom, 8)
-                } else if let url = vm.imageURL {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty: ZStack { Rectangle().fill(Color.secondary.opacity(0.1)); ProgressView() }
-                        case .success(let image): image.resizable().scaledToFill()
-                        case .failure: Image(systemName: "photo").resizable().scaledToFit().padding()
-                        @unknown default: EmptyView()
-                        }
+                } else {
+                    AsyncImageView(url: vm.imageURL, cornerRadius: 12) {
+                        ZStack { Rectangle().fill(Color.secondary.opacity(0.1)); ProgressView() }
+                    } failure: {
+                        Image(systemName: "photo").resizable().scaledToFit().padding()
                     }
-                    .frame(height: 220)
-                    .clipped()
-                    .cornerRadius(12)
+                    .padding(.bottom, 8)
                 }
                 
+                // Title + date + favorite
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(vm.title).font(.title2).bold()
                         Text(vm.dateText).font(.subheadline).foregroundColor(.secondary)
                     }
                     Spacer()
-                    Button {
-                        vm.toggleFavorite()
-                    } label: {
+                    Button { vm.toggleFavorite() } label: {
                         Image(systemName: vm.isFavorite ? "heart.fill" : "heart")
                             .font(.title3)
                     }
                     .buttonStyle(.borderless)
                 }
                 
+                // Details
                 if let details = vm.detailsText, !details.isEmpty {
                     Text(details).font(.body)
                 }
                 
+                // Rocket / payload
                 if vm.rocketName != nil || vm.payloadMassText != nil {
                     VStack(alignment: .leading, spacing: 8) {
                         if let name = vm.rocketName {
-                            Label(name, systemImage: "rocket")
+                            Text("Rocket name: \(name)")
+                                .font(.headline)
                         }
                         if let mass = vm.payloadMassText {
                             Label("Payload total: \(mass)", systemImage: "scalemass")
@@ -63,19 +87,16 @@ struct LaunchDetailsView: View {
                     .font(.subheadline)
                 }
                 
+                // External links
                 if vm.youtubeURL != nil || vm.wikipediaURL != nil {
                     HStack {
                         if let y = vm.youtubeURL {
-                            Button {
-                                safariURL = y
-                            } label: {
+                            Button { safariURL = y } label: {
                                 Label("Watch on YouTube", systemImage: "play.rectangle.fill")
                             }
                         }
                         if let w = vm.wikipediaURL {
-                            Button {
-                                safariURL = w
-                            } label: {
+                            Button { safariURL = w } label: {
                                 Label("Wikipedia", systemImage: "book.fill")
                             }
                         }
@@ -85,16 +106,6 @@ struct LaunchDetailsView: View {
             }
             .padding()
         }
-        .overlay {
-            if vm.isLoading { ProgressView().scaleEffect(1.2) }
-        }
-        .alert("Error", isPresented: .constant(vm.errorMessage != nil)) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(vm.errorMessage ?? "")
-        }
-        .sheet(item: $safariURL, content: { url in SafariView(url: url) })
-        .onAppear { vm.onAppear() }
     }
 }
 
