@@ -14,7 +14,7 @@ struct SpaceXApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView(factory: di.factory)
                 .environmentObject(coordinator)
                 .environmentObject(di)
         }
